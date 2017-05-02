@@ -29,7 +29,7 @@ ext{
     targetSdkVersion = 25
     compileSdkVersion = 25
     buildToolsVersion = "25.0.2"
-    supportLibraryVersion = "25.1.1"
+    supportLibraryVersion = "23.0.1"
     firebaseVersion = "10.2.0"
     firebaseUiVersion = "1.2.0"
     fabDialVersion = "1.0.4"

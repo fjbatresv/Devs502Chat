@@ -3,6 +3,7 @@ package com.gt.fjbatresv.devs502.login.ui;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -83,6 +84,11 @@ public class LoginActivity extends AppCompatActivity {
                 //Fallo
                 if (response == null) {
                     Log.e("Auth", "Cancelado");
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        finishAndRemoveTask();
+                    }else{
+                        finishAffinity();
+                    }
                 }else if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
                     Log.e("Auth", "Sin Internet");
                 }else if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {

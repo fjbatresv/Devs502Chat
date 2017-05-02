@@ -66,8 +66,8 @@ public class MainActivity extends AppCompatActivity
     ImageButton sendBtn;
     @Bind(R.id.messageProgessBar)
     ProgressBar messageProgessBar;
-    @Bind(R.id.wrapperMessage)
-    TextInputLayout wrapperMessage;
+    /*@Bind(R.id.wrapperMessage)
+    TextInputLayout wrapperMessage;*/
     @Bind(R.id.offline)
     LinearLayout offline;
 
@@ -224,11 +224,11 @@ public class MainActivity extends AppCompatActivity
     public void connection(boolean conected) {
         if (conected){
             offline.setVisibility(gone);
-            wrapperMessage.setVisibility(visible);
+            message.setVisibility(visible);
             sendBtn.setEnabled(true);
         }else{
             offline.setVisibility(visible);
-            wrapperMessage.setVisibility(gone);
+            message.setVisibility(gone);
             sendBtn.setEnabled(false);
         }
     }
