@@ -1,6 +1,14 @@
 apply plugin: "com.android.application"
 apply plugin: "com.neenbedankt.android-apt"
 android {
+    signingConfigs {
+        config {
+            keyAlias 'fjbatresv'
+            keyPassword 'fjbv123'
+            storeFile file('C:/Users/javie/Documents/Javier/Devs502Chat/apk/keystore.jks')
+            storePassword 'fjbv1234'
+        }
+    }
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
@@ -12,12 +20,12 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             resValue "string", "facebook_application_id", project.property('FACEBOOK_APP_ID')
             resValue "string", "facebook_login_protocol_scheme", project.property('FACEBOOK_LOGIN_PROTOCOL_SCHEME')
             resValue "string", "twitter_consumer_key", project.property('TWITTER_KEY')
             resValue "string", "twitter_consumer_secret", project.property('TWITTER_SECRET')
+            signingConfig signingConfigs.config
         }
         debug {
             resValue "string", "facebook_application_id", project.property('FACEBOOK_APP_ID')
@@ -34,7 +42,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: "libs", include: ["*.jar"])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     //Material Design
     compile "com.android.support:recyclerview-v7:$rootProject.ext.supportLibraryVersion"
     compile "com.android.support:appcompat-v7:$rootProject.ext.supportLibraryVersion"
@@ -46,13 +54,13 @@ dependencies {
     compile "com.google.firebase:firebase-auth:$rootProject.ext.firebaseVersion"
     compile "com.google.firebase:firebase-database:$rootProject.ext.firebaseVersion"
     compile "com.google.firebase:firebase-messaging:$rootProject.ext.firebaseVersion"
-    //compile "com.google.firebase:firebase-crash:$rootProject.ext.firebaseVersion"
+    compile "com.google.firebase:firebase-crash:$rootProject.ext.firebaseVersion"
     compile "com.google.firebase:firebase-config:$rootProject.ext.firebaseVersion"
     //FIREBASE UI AUTH
     compile "com.firebaseui:firebase-ui-auth:$rootProject.ext.firebaseUiVersion"
     compile "com.google.android.gms:play-services-auth:$rootProject.ext.firebaseVersion"
     compile "com.facebook.android:facebook-android-sdk:$rootProject.ext.facebookVersion"
-    compile("com.twitter.sdk.android:twitter:$rootProject.ext.twitterVersion") { transitive = true }
+    compile("com.twitter.sdk.android:twitter:$rootProject.ext.twitterVersion") {transitive = true}
     //Fab Speed Dial - GITHUB
     compile "io.github.yavski:fab-speed-dial:$rootProject.ext.fabDialVersion"
     //Inyeccion de dependencias
@@ -74,7 +82,6 @@ dependencies {
     compile "com.github.medyo:android-about-page:$rootProject.ext.aboutVersion"
     //Twitter
     //Facebook
-
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
 }

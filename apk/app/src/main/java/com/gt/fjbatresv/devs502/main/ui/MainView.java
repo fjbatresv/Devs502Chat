@@ -18,4 +18,5 @@ public interface MainView {
     void sendMessage();
     void showToast(String msg);
     void showSnack(String msg);
+    void connection(boolean conected);
 }

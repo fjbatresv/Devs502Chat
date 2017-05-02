@@ -1,6 +1,7 @@
 package com.gt.fjbatresv.devs502.firebase;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -10,6 +11,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -23,6 +25,8 @@ import com.gt.fjbatresv.devs502.R;
 import com.gt.fjbatresv.devs502.entities.Message;
 import com.gt.fjbatresv.devs502.lib.base.EventBus;
 import com.gt.fjbatresv.devs502.main.events.MainEvent;
+import com.gt.fjbatresv.devs502.utils.ConfigKeys;
+import com.gt.fjbatresv.devs502.utils.GeneralUtil;
 
 /**
  * Created by javie on 28/03/2017.
@@ -57,6 +61,7 @@ public class FirebaseHelper {
                     conectado = false;
                 }
                 Log.e("conectadoList", String.valueOf(conectado));
+                posConection(conectado);
             }
 
             @Override
@@ -66,6 +71,10 @@ public class FirebaseHelper {
             }
         });
         buildConfig();
+    }
+
+    private void posConection(boolean conectado) {
+        this.bus.post(new MainEvent(MainEvent.connection, conectado));
     }
 
     private void buildConfig() {
@@ -96,20 +105,22 @@ public class FirebaseHelper {
 
     public void sendError(String error) {
         if (error != null && !error.isEmpty() && conectado) {
-            //try{FirebaseCrash.report(new Exception(error));}catch(Exception ex){}
+            try{
+                FirebaseCrash.report(new Exception(error));}catch(Exception ex){}
             Log.e("sendError", error);
         }
     }
 
     public void sendLog(String log) {
         if (log != null && !log.isEmpty() && conectado) {
-            //try{FirebaseCrash.log(log);}catch(Exception ex){}
+            try{FirebaseCrash.log(log);}catch(Exception ex){}
             Log.e("sendLog", log);
         }
     }
 
     public void logOut(FirebaseListener listener){
         this.mAuth.signOut();
+        sendLog("log out");
         listener.onSuccess();
     }
 
@@ -118,12 +129,38 @@ public class FirebaseHelper {
         if (user != null){
             listener.onSuccess(user);
         }else{
+            sendLog("No user");
             listener.onError("none");
         }
     }
 
-    public void sendMessage(String message, FirebaseListener listener){
-
+    public void sendMessage(String message, final FirebaseListener listener){
+        FirebaseUser user = this.mAuth.getCurrentUser();
+        Message mensaje = new Message();
+        mensaje.setRemitente(user.getDisplayName());
+        if(user.getPhotoUrl() != null){
+            mensaje.setRemitentePhoto(user.getPhotoUrl().toString());
+        }
+        mensaje.setRemitenteUid(user.getUid());
+        mensaje.setCui(GeneralUtil.uniqueCui());
+        mensaje.setMensaje(message);
+        mensaje.setTime(GeneralUtil.getTime());
+        final String logSuccess = "Message send [" + mensaje.getCui() + "]";
+        this.database.child("mensajes").child(mensaje.getCui()).setValue(mensaje, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError == null){
+                    sendLog(logSuccess);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(ConfigKeys.sendMessage, databaseReference.getKey());
+                    analytics.logEvent(ConfigKeys.sendMessage, bundle);
+                    listener.onSuccess();
+                }else{
+                    sendError(databaseError.toException().getLocalizedMessage());
+                    listener.onError(databaseError.toException().getLocalizedMessage());
+                }
+            }
+        });
     }
 
     public void subscribeMessages(){
@@ -146,7 +183,7 @@ public class FirebaseHelper {
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         };
-        this.database.child("mensajes").addChildEventListener(this.mesagesListener);
+        this.database.child("mensajes").orderByChild("time").addChildEventListener(this.mesagesListener);
     }
 
     public void unSubscribeMessages(){

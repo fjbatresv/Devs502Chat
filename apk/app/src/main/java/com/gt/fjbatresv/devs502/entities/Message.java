@@ -12,16 +12,18 @@ public class Message implements Serializable{
     private String remitente;
     private String remitenteUid;
     private String remitentePhoto;
+    private long time;
 
     public Message() {
     }
 
-    public Message(String cui, String mensaje, String remitente, String remitenteUid, String remitentePhoto) {
+    public Message(String cui, String mensaje, String remitente, String remitenteUid, String remitentePhoto, long time) {
         this.cui = cui;
         this.mensaje = mensaje;
         this.remitente = remitente;
         this.remitenteUid = remitenteUid;
         this.remitentePhoto = remitentePhoto;
+        this.time = time;
     }
 
     public String getCui() {
@@ -62,5 +64,13 @@ public class Message implements Serializable{
 
     public void setRemitentePhoto(String remitentePhoto) {
         this.remitentePhoto = remitentePhoto;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }

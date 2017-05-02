@@ -68,12 +68,12 @@ public class MainRepoImpl implements MainRepo {
         helper.sendMessage(msg, new FirebaseListener() {
             @Override
             public void onSuccess() {
-
+                bus.post(new MainEvent(MainEvent.sendMessage));
             }
 
             @Override
             public void onError(String error) {
-
+                bus.post(new MainEvent(MainEvent.sendMessage, error));
             }
         });
     }

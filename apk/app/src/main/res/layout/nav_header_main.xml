@@ -18,7 +18,7 @@
         android:id="@+id/userAvatar"
         app:civ_border_width="1dp"
         app:civ_border_color="@color/icons"
-        android:src="@mipmap/ic_launcher" />
+        android:src="@drawable/ic_account_circle_white_48dp" />
 
     <TextView
         android:layout_width="match_parent"

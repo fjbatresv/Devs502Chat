@@ -14,7 +14,7 @@ import dagger.Provides;
  * Created by javie on 28/03/2017.
  */
 @Module
-class FirebaseModule {
+public class FirebaseModule {
     @Singleton
     @Provides
     FirebaseHelper providesFirebaseHelper(Context context, EventBus bus){

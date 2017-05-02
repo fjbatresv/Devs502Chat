@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -13,7 +16,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseUser;
@@ -23,6 +32,7 @@ import com.gt.fjbatresv.devs502.entities.Message;
 import com.gt.fjbatresv.devs502.lib.base.ImageLoader;
 import com.gt.fjbatresv.devs502.login.ui.LoginActivity;
 import com.gt.fjbatresv.devs502.main.MainPresenter;
+import com.gt.fjbatresv.devs502.main.ui.adapters.MessagesAdapter;
 
 import java.util.List;
 
@@ -30,6 +40,8 @@ import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, MainView{
@@ -41,14 +53,35 @@ public class MainActivity extends AppCompatActivity
     NavigationView navigationView;
 
     @Bind(R.id.container)
-    RelativeLayout container;
+    LinearLayout container;
+
+    @Bind(R.id.messages)
+    RecyclerView messages;
+    @Bind(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @Bind(R.id.message)
+    EditText message;
+    @Bind(R.id.sendBtn)
+    ImageButton sendBtn;
+    @Bind(R.id.messageProgessBar)
+    ProgressBar messageProgessBar;
+    @Bind(R.id.wrapperMessage)
+    TextInputLayout wrapperMessage;
+    @Bind(R.id.offline)
+    LinearLayout offline;
 
     @Inject
     MainPresenter presenter;
     @Inject
     ImageLoader loader;
+    @Inject
+    MessagesAdapter adapter;
 
     private App app;
+
+    private int visible = View.VISIBLE;
+    private int gone = View.GONE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +96,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void injection() {
+        app.main(this, this).inject(this);
+        messages.setLayoutManager(new LinearLayoutManager(this));
+        messages.setAdapter(adapter);
+    }
 
+    @OnClick(R.id.sendBtn)
+    public void sendBtn(){
+        presenter.sendMessage(message.getText().toString());
     }
 
     @Override
@@ -75,7 +115,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         presenter.unSubMessages();
-        //Clear messages
+        adapter.clear();
         super.onPause();
     }
 
@@ -106,21 +146,9 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        if (id == R.id.sign_out) {
+            presenter.logout();
         }
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -128,17 +156,35 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void loadMessages(Message message) {
-
+        adapter.add(message);
+        messages.scrollToPosition(adapter.getItemCount() - 1);
     }
+
 
     @Override
     public void loading(boolean load) {
-
+        if (load){
+            messages.setVisibility(gone);
+            progressBar.setVisibility(visible);
+        }else{
+            messages.setVisibility(visible);
+            progressBar.setVisibility(gone);
+        }
     }
 
     @Override
     public void loadinSending(boolean load) {
-
+        if (load){
+            sendBtn.setEnabled(false);
+            message.setEnabled(false);
+            sendBtn.setVisibility(gone);
+            messageProgessBar.setVisibility(visible);
+        }else{
+            sendBtn.setEnabled(true);
+            message.setEnabled(true);
+            sendBtn.setVisibility(visible);
+            messageProgessBar.setVisibility(gone);
+        }
     }
 
     @Override
@@ -149,12 +195,19 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void loadUser(FirebaseUser user) {
-
+        View header = navigationView.getHeaderView(0);
+        TextView userName = (TextView) header.findViewById(R.id.userName);
+        CircleImageView userAvatar = (CircleImageView) header.findViewById(R.id.userAvatar);
+        if(user.getPhotoUrl() != null){
+            loader.load(userAvatar, user.getPhotoUrl().toString());
+        }
+        userName.setText(user.getDisplayName());
+        adapter.setUserUid(user.getUid());
     }
 
     @Override
     public void sendMessage() {
-
+        message.setText(null);
     }
 
     @Override
@@ -165,5 +218,18 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void showSnack(String msg) {
         Snackbar.make(container, msg, Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void connection(boolean conected) {
+        if (conected){
+            offline.setVisibility(gone);
+            wrapperMessage.setVisibility(visible);
+            sendBtn.setEnabled(true);
+        }else{
+            offline.setVisibility(visible);
+            wrapperMessage.setVisibility(gone);
+            sendBtn.setEnabled(false);
+        }
     }
 }

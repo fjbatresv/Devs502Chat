@@ -7,6 +7,7 @@ import java.io.Serializable;
  */
 
 public class MainEvent implements Serializable{
+    public final static int connection = 4;
     private int tipo;
     private Object object;
     private String mensaje;

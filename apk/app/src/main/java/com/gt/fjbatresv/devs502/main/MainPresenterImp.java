@@ -38,7 +38,7 @@ public class MainPresenterImp implements MainPresenter {
     public void onEvent(MainEvent event) {
         if (event.getTipo() == MainEvent.sendMessage){
             view.loadinSending(false);
-            if (!event.getError().isEmpty() && event.getError() != null){
+            if (event.getError() != null){
                 view.showToast(event.getError());
             }else{
                 view.sendMessage();
@@ -57,6 +57,9 @@ public class MainPresenterImp implements MainPresenter {
                         break;
                     case MainEvent.logOut:
                         view.logout();
+                        break;
+                    case MainEvent.connection:
+                        view.connection((Boolean) event.getObject());
                         break;
                 }
             }

@@ -25,4 +25,8 @@ public class GeneralUtil {
     public static String uniqueCui(){
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
+
+    public static long getTime(){
+        return System.currentTimeMillis();
+    }
 }
